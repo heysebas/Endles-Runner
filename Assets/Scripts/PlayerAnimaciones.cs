@@ -2,17 +2,51 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NewBehaviourScript : MonoBehaviour
+public class PlayerAnimaciones : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private Animator animator;
+    private string animacionActual;
+
+
+    private void Awake()
     {
-        
+        animator = GetComponent<Animator>();
+
     }
 
-    // Update is called once per frame
-    void Update()
+    private void CambiarAnimacion(string nuevaAnimacion)
     {
-        
+        if (animacionActual == nuevaAnimacion)
+        {
+            return;
+        }
+
+        animator.Play(nuevaAnimacion);
+        animacionActual = nuevaAnimacion;
+    }
+
+    public void MostrarAnimacionIdle()
+    {
+        CambiarAnimacion("Idle");
+    }
+
+    public void MostrarAnimacionCorrer()
+    {
+        CambiarAnimacion("Run");
+    }
+
+    public void MostrarAnimacionSaltar()
+    {
+        CambiarAnimacion("Jump");
+    }
+
+    public void MostrarAnimacionDelizar()
+    {
+        CambiarAnimacion("Crawl");
+    }
+
+    public void MostrarAnimacionColision()
+    {
+        CambiarAnimacion("Dead");
     }
 }

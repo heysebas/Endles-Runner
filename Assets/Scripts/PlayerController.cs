@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static GameManager; // Reemplaza 'TuNamespace' con el nombre del espacio de nombres donde se encuentra la clase 'GameManager'
+
 
 public enum DireccionInpunt
 {
@@ -13,6 +15,7 @@ public enum DireccionInpunt
 
 public class PlayerController : MonoBehaviour
 {
+
     [Header("Config")]
     [SerializeField] private float velocidadMovimiento;
     [SerializeField] private float valorSalto = 15f;
@@ -28,6 +31,7 @@ public class PlayerController : MonoBehaviour
     private DireccionInpunt direccionInpunt;
     private Coroutine coroutineDelizar;
     private CharacterController characterController;
+    private PlayerAnimaciones playerAnimaciones;
     private float posicionVertical;
     private int carrilActual;
     private Vector3 direccionDeseada;
@@ -39,6 +43,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
+        playerAnimaciones = GetComponent<PlayerAnimaciones>();
     }
 
     // Start is called before the first frame update
@@ -52,6 +57,11 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(GameManager.Instancia.EstadoActual == EstadoDelJuego.Inicio ||
+           GameManager.Instancia.EstadoActual == EstadoDelJuego.GameOver)
+        {
+            return;
+        }
         DetectarInput();
         ControlarCarriles();
         CalcularMovimientoVertical();
@@ -71,11 +81,17 @@ public class PlayerController : MonoBehaviour
             EstaSaltando = false;
             posicionVertical = 0f;
 
+            if(EstaDelizando == false && EstaSaltando == false)
+            {
+                playerAnimaciones.MostrarAnimacionCorrer();
+            }
+
             if (direccionInpunt == DireccionInpunt.Arriba)
             {
                 posicionVertical = valorSalto;
                 EstaSaltando = true;
-                if(coroutineDelizar != null)
+                playerAnimaciones.MostrarAnimacionSaltar();
+                if (coroutineDelizar != null)
                 {
                     EstaDelizando = false;
                     ModificarColliderDeslizar(false);
@@ -172,10 +188,12 @@ public class PlayerController : MonoBehaviour
     private IEnumerator CODelizatPersonaje()
     {
         EstaDelizando = true;
+        playerAnimaciones.MostrarAnimacionDelizar();
         ModificarColliderDeslizar(true);
         yield return new WaitForSeconds(2f);
         EstaDelizando = false;
         ModificarColliderDeslizar(false);
+
 
     }
 
@@ -223,6 +241,19 @@ public class PlayerController : MonoBehaviour
         }
 
         carrilActual = Mathf.Clamp(carrilActual, -1, 1);
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (hit.collider.CompareTag("Obstaculo"))
+        {
+            if (GameManager.Instancia.EstadoActual == EstadoDelJuego.GameOver)
+            {
+                return;
+            }
+            playerAnimaciones.MostrarAnimacionColision();
+            GameManager.Instancia.CambiarEstado(EstadoDelJuego.GameOver);
+        }
     }
 
 }
