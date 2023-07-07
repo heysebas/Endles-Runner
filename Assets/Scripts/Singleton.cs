@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Singleton<T> : MonoBehaviour where T : Component
@@ -14,10 +12,11 @@ public class Singleton<T> : MonoBehaviour where T : Component
                 _instancia = FindObjectOfType<T>();
                 if (_instancia == null)
                 {
-                    GameObject nuevoGo = new GameObject();
-                    _instancia = nuevoGo.AddComponent<T>();
+                    GameObject nuevoGO = new GameObject();
+                    _instancia = nuevoGO.AddComponent<T>();
                 }
             }
+
             return _instancia;
         }
     }

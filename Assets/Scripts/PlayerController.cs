@@ -1,35 +1,32 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using static GameManager; // Reemplaza 'TuNamespace' con el nombre del espacio de nombres donde se encuentra la clase 'GameManager'
 
-
-public enum DireccionInpunt
+public enum DireccionInput
 {
     Null,
     Arriba,
-    Izquieda,
+    Izquierda, 
     Derecha,
     Abajo
 }
 
 public class PlayerController : MonoBehaviour
 {
-
     [Header("Config")]
     [SerializeField] private float velocidadMovimiento;
     [SerializeField] private float valorSalto = 15f;
     [SerializeField] private float gravedad = 20f;
 
-    [Header("Carril")]
+    [Header("Carril")] 
     [SerializeField] private float posicionCarrilIzquierdo = -3.1f;
     [SerializeField] private float posicionCarrilDerecho = 3.1f;
 
-    public bool EstaSaltando{get; private set;}
-    public bool EstaDelizando { get; private set;}
-
-    private DireccionInpunt direccionInpunt;
-    private Coroutine coroutineDelizar;
+    public bool EstaSaltando { get; private set; }
+    public bool EstaDeslizando { get; private set; }
+    
+    private DireccionInput direccionInput;
+    private Coroutine coroutineDeslizar;
     private CharacterController characterController;
     private PlayerAnimaciones playerAnimaciones;
     private float posicionVertical;
@@ -39,29 +36,28 @@ public class PlayerController : MonoBehaviour
     private float controllerRadio;
     private float controllerAltura;
     private float controllerPosicionY;
-
+    
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
         playerAnimaciones = GetComponent<PlayerAnimaciones>();
     }
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         controllerRadio = characterController.radius;
         controllerAltura = characterController.height;
         controllerPosicionY = characterController.center.y;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if(GameManager.Instancia.EstadoActual == EstadoDelJuego.Inicio ||
-           GameManager.Instancia.EstadoActual == EstadoDelJuego.GameOver)
+        if (GameManager.Instancia.EstadoActual == EstadosDelJuego.Inicio ||
+            GameManager.Instancia.EstadoActual == EstadosDelJuego.GameOver)
         {
             return;
         }
+        
         DetectarInput();
         ControlarCarriles();
         CalcularMovimientoVertical();
@@ -81,38 +77,42 @@ public class PlayerController : MonoBehaviour
             EstaSaltando = false;
             posicionVertical = 0f;
 
-            if(EstaDelizando == false && EstaSaltando == false)
+            if (EstaDeslizando == false && EstaSaltando == false)
             {
                 playerAnimaciones.MostrarAnimacionCorrer();
             }
 
-            if (direccionInpunt == DireccionInpunt.Arriba)
+            if (direccionInput == DireccionInput.Arriba)
             {
                 posicionVertical = valorSalto;
                 EstaSaltando = true;
                 playerAnimaciones.MostrarAnimacionSaltar();
-                if (coroutineDelizar != null)
+                if (coroutineDeslizar != null)
                 {
-                    EstaDelizando = false;
+                    StopCoroutine(coroutineDeslizar);
+                    EstaDeslizando = false;
                     ModificarColliderDeslizar(false);
                 }
             }
-            if (direccionInpunt == DireccionInpunt.Abajo)
+
+            if (direccionInput == DireccionInput.Abajo)
             {
-                if (EstaDelizando)
+                if (EstaDeslizando)
                 {
                     return;
                 }
-                if (coroutineDelizar != null)
+
+                if (coroutineDeslizar != null)
                 {
-                    StopCoroutine(coroutineDelizar);
+                    StopCoroutine(coroutineDeslizar);
                 }
+                
                 DeslizarPersonaje();
             }
         }
         else
         {
-            if(direccionInpunt == DireccionInpunt.Abajo)
+            if (direccionInput == DireccionInput.Abajo)
             {
                 posicionVertical -= valorSalto;
                 DeslizarPersonaje();
@@ -121,28 +121,26 @@ public class PlayerController : MonoBehaviour
 
         posicionVertical -= gravedad * Time.deltaTime;
     }
-
+    
     private void ControlarCarriles()
     {
         switch (carrilActual)
         {
-            //Mover Izquierda
             case -1:
-                LogicaCarriIzquierdo();
+                LogicaCarrilIzquierdo();
                 break;
             case 0:
                 LogicaCarrilCentral();
                 break;
-            //Mover Derecha
             case 1:
-                LogicaCarriDerecho();
+                LogicaCarrilDerecho();
                 break;
         }
     }
 
     private void LogicaCarrilCentral()
     {
-        if(transform.position.x > 0.1f)
+        if (transform.position.x > 0.1f)
         {
             MoverHorizontal(0f, Vector3.left);
         }
@@ -155,17 +153,17 @@ public class PlayerController : MonoBehaviour
             direccionDeseada = Vector3.zero;
         }
     }
-
-    private void LogicaCarriIzquierdo()
+    
+    private void LogicaCarrilIzquierdo()
     {
         MoverHorizontal(posicionCarrilIzquierdo, Vector3.left);
     }
 
-    private void LogicaCarriDerecho()
+    private void LogicaCarrilDerecho()
     {
         MoverHorizontal(posicionCarrilDerecho, Vector3.right);
     }
-
+    
     private void MoverHorizontal(float posicionX, Vector3 dirMovimiento)
     {
         float posicionHorizontal = Mathf.Abs(transform.position.x - posicionX);
@@ -182,62 +180,55 @@ public class PlayerController : MonoBehaviour
 
     private void DeslizarPersonaje()
     {
-        coroutineDelizar = StartCoroutine(CODelizatPersonaje());
+        coroutineDeslizar = StartCoroutine(CODeslizarPersonaje());
     }
-
-    private IEnumerator CODelizatPersonaje()
+    
+    private IEnumerator CODeslizarPersonaje()
     {
-        EstaDelizando = true;
-        playerAnimaciones.MostrarAnimacionDelizar();
+        EstaDeslizando = true;
+        playerAnimaciones.MostrarAnimacionDeslizar();
         ModificarColliderDeslizar(true);
         yield return new WaitForSeconds(2f);
-        EstaDelizando = false;
+        EstaDeslizando = false;
         ModificarColliderDeslizar(false);
-
-
     }
-
+    
     private void ModificarColliderDeslizar(bool modificar)
     {
         if (modificar)
         {
-            // Modificar collider
             characterController.radius = 0.3f;
             characterController.height = 0.6f;
-            characterController.center = new Vector3(0f, 0.35f, 0);
-
+            characterController.center = new Vector3(0f, 0.35f, 0f);
         }
         else
         {
             characterController.radius = controllerRadio;
             characterController.height = controllerAltura;
-            characterController.center = new Vector3(0f, controllerPosicionY, 0);
+            characterController.center = new Vector3(0f, controllerPosicionY, 0f);
         }
     }
-
-
+    
     private void DetectarInput()
     {
-        direccionInpunt = DireccionInpunt.Null;
+        direccionInput = DireccionInput.Null;
         if (Input.GetKeyDown(KeyCode.A))
         {
-            direccionInpunt = DireccionInpunt.Izquieda;
+            direccionInput = DireccionInput.Izquierda;
             carrilActual--;
         }
         else if (Input.GetKeyDown(KeyCode.D))
         {
-            direccionInpunt = DireccionInpunt.Derecha;
+            direccionInput = DireccionInput.Derecha;
             carrilActual++;
-        }
-        else if (Input.GetKeyDown(KeyCode.W))
-        {
-            direccionInpunt = DireccionInpunt.Arriba;
-           
         }
         else if (Input.GetKeyDown(KeyCode.S))
         {
-            direccionInpunt = DireccionInpunt.Abajo;
-            
+            direccionInput = DireccionInput.Abajo;
+        }
+        else if (Input.GetKeyDown(KeyCode.W))
+        {
+            direccionInput = DireccionInput.Arriba;
         }
 
         carrilActual = Mathf.Clamp(carrilActual, -1, 1);
@@ -247,13 +238,13 @@ public class PlayerController : MonoBehaviour
     {
         if (hit.collider.CompareTag("Obstaculo"))
         {
-            if (GameManager.Instancia.EstadoActual == EstadoDelJuego.GameOver)
+            if (GameManager.Instancia.EstadoActual == EstadosDelJuego.GameOver)
             {
                 return;
             }
+            
             playerAnimaciones.MostrarAnimacionColision();
-            GameManager.Instancia.CambiarEstado(EstadoDelJuego.GameOver);
+            GameManager.Instancia.CambiarEstado(EstadosDelJuego.GameOver);
         }
     }
-
 }
