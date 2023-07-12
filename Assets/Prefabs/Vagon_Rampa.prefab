@@ -104,8 +104,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 7.0266767, y: 0.6877525, z: 2.5905755}
-  m_Center: {x: 0, y: 2.8965611, z: 0}
+  m_Size: {x: 7.0266767, y: 0.6877527, z: 2.928303}
+  m_Center: {x: -3.7452356e-17, y: 2.8965611, z: 0.012989521}
 --- !u!1 &9069038682188409249
 GameObject:
   m_ObjectHideFlags: 0
@@ -138,7 +138,7 @@ Transform:
   - {fileID: 2409130561539260158}
   - {fileID: 8976434823412797648}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &5934595604422679273
 PrefabInstance:
