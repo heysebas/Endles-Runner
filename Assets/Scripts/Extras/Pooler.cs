@@ -28,7 +28,7 @@ public class Pooler : MonoBehaviour
             }
         }
     }
-    
+
     private GameObject AñadirInstancia(GameObject obj)
     {
         GameObject nuevoObj = Instantiate(obj, contenedorPooler.transform);
@@ -47,6 +47,19 @@ public class Pooler : MonoBehaviour
                 {
                     return instanciasCreadas[i];
                 }
+            }
+        }
+
+        return null;
+    }
+
+    public GameObject ObtenerInstanciaDelPooler()
+    {
+        for (int i = 0; i < instanciasCreadas.Count; i++)
+        {
+            if (instanciasCreadas[i].activeSelf == false)
+            {
+                return instanciasCreadas[i];
             }
         }
 

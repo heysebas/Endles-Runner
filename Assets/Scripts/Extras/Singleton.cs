@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Singleton<T> : MonoBehaviour where T : Component
 {
+    [SerializeField] private bool activarDontDestroy;
+    
     private static T _instancia;
     public static T Instancia
     {
@@ -21,8 +23,24 @@ public class Singleton<T> : MonoBehaviour where T : Component
         }
     }
 
-    private void Awake()
+    protected virtual void Awake()
     {
-        _instancia = this as T;
+        if (activarDontDestroy)
+        {
+            if (_instancia == null)
+            {
+                _instancia = this as T;
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+            
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            _instancia = this as T;
+        }
     }
 }

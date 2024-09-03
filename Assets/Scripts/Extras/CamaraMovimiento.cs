@@ -6,7 +6,6 @@ using UnityEngine;
 public class CamaraMovimiento : MonoBehaviour
 {
     [Header("Config")]
-    [SerializeField] private Transform personajeTransform;
     [SerializeField] private float alturaDelPersonaje;
     [SerializeField] private float distanciaDelPersonaje;
 
@@ -19,7 +18,7 @@ public class CamaraMovimiento : MonoBehaviour
 
     private void LateUpdate()
     {
-        Vector3 posPersonaje = personajeTransform.position;
+        Vector3 posPersonaje = GameManager.Instancia.PersonajeActivo.position;
         miCamaraPos.x = Mathf.Lerp(miCamaraPos.x, posPersonaje.x, Time.deltaTime * 10f);
         miCamaraPos.y = Mathf.Lerp(miCamaraPos.y, posPersonaje.y + alturaDelPersonaje, Time.deltaTime * 10f);
         miCamaraPos.z = Mathf.Lerp(miCamaraPos.z, posPersonaje.z + distanciaDelPersonaje, Time.deltaTime * 10f);
